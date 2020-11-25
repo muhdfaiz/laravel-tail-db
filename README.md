@@ -1,5 +1,10 @@
 # Laravel Tail DB
 
+[![tests](https://github.com/muhdfaiz/laravel-tail-db/workflows/testing/badge.svg)](https://github.com/muhdfaiz/laravel-tail-db/actions)
+[![Version](https://poser.pugx.org/muhdfaiz/laravel-tail-db/version)](//packagist.org/packages/muhdfaiz/laravel-tail-db)
+[![Total Downloads](https://poser.pugx.org/muhdfaiz/laravel-tail-db/downloads)](//packagist.org/packages/muhdfaiz/laravel-tail-db)
+[![License](https://poser.pugx.org/muhdfaiz/laravel-tail-db/license)](//packagist.org/packages/muhdfaiz/laravel-tail-db)
+
 A package to monitor, troubleshoot and optimize SQL query using console.
 
 <img src="https://muhdfaiz.github.io/laravel-tail-db/assets/images/postgresql.png" width="600" alt="">
