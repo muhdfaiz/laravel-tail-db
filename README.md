@@ -15,7 +15,7 @@ A package to monitor, troubleshoot and optimize SQL query using console.
 ## Requirements
 
 - PHP: ^7.0
-- Laravel: ~6.0|~7.0|~8.0
+- Laravel: ~5.5|~5.6|~5.7|~5.8|~6.0|~7.0|~8.0
 
 
 ## Installation
