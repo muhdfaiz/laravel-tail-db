@@ -2,6 +2,8 @@
 
 A package to monitor, troubleshoot and optimize SQL query using console.
 
+<img src="https://muhdfaiz.github.io/laravel-tail-db/assets/images/postgresql.png" width="600" alt="">
+
 ## Features
 
 - **Monitor SQL query.** Display SQL query executed from application in the console.
@@ -9,6 +11,18 @@ A package to monitor, troubleshoot and optimize SQL query using console.
 - **Optimize SQL query.** Automatically run `explain` command and output to console.
 
 - **Detect slow SQL query.** Highlight slow SQL query.
+
+## Requirements
+
+- PHP: ^7.0
+- Laravel: ~6.0|~7.0|~8.0
+
+
+## Installation
+
+```
+composer require muhdfaiz/laravel-tail-db
+```
 
 ## Documentation
 
