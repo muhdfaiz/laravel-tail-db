@@ -1,0 +1,74 @@
+# This is a basic workflow to help you get started with Actions
+
+name: testing
+
+# Controls when the action will run. 
+on:
+    # Triggers the workflow on push or pull request events but only for the master branch
+    push:
+        branches: [ master ]
+    pull_request:
+        branches: [ master ]
+
+    workflow_dispatch:
+
+jobs:
+    test:
+        runs-on: ${{ matrix.os }}
+
+        services:
+            mysql:
+                image: mysql:5.7
+                env:
+                    MYSQL_ALLOW_EMPTY_PASSWORD: yes
+                    MYSQL_USER: root
+                    MYSQL_DATABASE: test_db
+                ports:
+                    - 3306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ ubuntu-latest]
+                php: [ 7.4 ]
+                laravel: [ 6.*, 7.*, 8.* ]
+                include:
+                    -   laravel: 6.*
+                        testbench: 4.*
+                    -   laravel: 7.*
+                        testbench: 5.*
+                    -   laravel: 8.*
+                        testbench: 6.*
+
+        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Cache dependencies
+                uses: actions/cache@v2
+                with:
+                    path: ~/.composer/cache/files
+                    key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+                    coverage: none
+
+            -   name: Install dependencies
+                run: |
+                    composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+                    composer update --prefer-dist --no-interaction --no-suggest
+
+            -   name: Execute tests
+                env:
+                  DB_CONNECTION: mysql
+                  DB_DATABASE: test_db
+                  DB_PORT: ${{ job.services.mysql.ports[3306] }}
+                  DB_USER: root
+                  DB_HOST: 127.0.0.1
+                run: vendor/bin/phpunit

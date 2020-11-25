@@ -1,0 +1,48 @@
+{
+    "name": "muhdfaiz/laravel-tail-db",
+    "description": "Provide artisan command to tail database query. Able to automatically run explain command for each of query received.",
+    "keywords": [
+        "laravel",
+        "tail",
+        "log",
+        "explain",
+        "query",
+        "database",
+        "tail-db"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Muhammad Faiz",
+            "email": "muhdfaizhalim@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0",
+        "symfony/process": "^4.0|^5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0|^9.0",
+        "laravel/framework": "^6.0|^7.0|^8.0",
+        "orchestra/testbench": "^4.0|^5.0|^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Muhdfaiz\\LaravelTailDb\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Muhdfaiz\\LaravelTailDb\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Muhdfaiz\\LaravelTailDb\\TailDatabaseServiceProvider"
+            ]
+        }
+    },
+    "prefer-stable": true
+}
