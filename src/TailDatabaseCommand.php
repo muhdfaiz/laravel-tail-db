@@ -40,6 +40,14 @@ class TailDatabaseCommand extends Command
      */
     public function handle()
     {
+        $filename = config('tail-db.filename');
+        $path = config('tail-db.path');
+
+        // Check file exist. If not exist create empty log file.
+        if (!file_exists( $path . '/' . $filename)) {
+            file_put_contents($path . '/' . $filename, '');
+        }
+
         // Show an error message if Laravel Tail DB not enabled.
         if (!$this->checkStatusEnabled()) {
             $this->output->writeln(PHP_EOL);
@@ -57,6 +65,10 @@ class TailDatabaseCommand extends Command
             ->setTty(false)
             ->setTimeout(null)
             ->run(function ($type, $logData) {
+                if (!$logData) {
+                    return;
+                }
+
                 $logData = $this->parseLogData($logData);
 
                 $this->outputQueryDetails($logData);
