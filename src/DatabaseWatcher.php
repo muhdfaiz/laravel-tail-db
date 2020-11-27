@@ -2,7 +2,6 @@
 
 namespace Muhdfaiz\LaravelTailDb;
 
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
@@ -16,10 +15,10 @@ class DatabaseWatcher
     /**
      * Register the watcher.
      *
-     * @param  Application  $app
+     * @param  $app
      * @return  void
      */
-    public function register(Application $app)
+    public function register($app)
     {
         $app['events']->listen(QueryExecuted::class, [$this, 'recordQuery']);
     }

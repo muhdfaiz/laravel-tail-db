@@ -2,14 +2,12 @@
 
 namespace Muhdfaiz\LaravelTailDb;
 
-use Illuminate\Foundation\Application;
-
 class TailDatabase
 {
     /**
-     * Register the database watchers and start the logging if enabled.
+     * Register the database watchers.
      *
-     * @param  Application  $app
+     * @param  $app
      * @return void
      */
     public static function start($app)
@@ -23,11 +21,11 @@ class TailDatabase
 
     /**
      * Register database watcher.
-     * Used this watcher to store database query.
+     * Used this watcher to listen for new SQL query executed in the application..
      *
-     * @param Application $app
+     * @param $app
      */
-    protected static function registerDatabaseWatcher(Application $app)
+    protected static function registerDatabaseWatcher($app)
     {
         $databaseWatcher = $app->make(DatabaseWatcher::class);
 
