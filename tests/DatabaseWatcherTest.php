@@ -4,7 +4,6 @@ namespace Muhdfaiz\LaravelTailDb\Tests;
 
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Muhdfaiz\LaravelTailDb\Tests\TestClasses\UserModel;
@@ -120,11 +119,10 @@ class DatabaseWatcherTest extends TestCase
     /**
      * @test
      * @environment-setup useEnableLogging
+     * @environment-setup useIgnoreQueryKeyword
      */
     public function it_will_not_record_query_contains_ignore_keyword()
     {
-        config(['tail-db.ignore_query_keyword' => 'select|insert']);
-
         $this->createDummyData();
 
         $filename = config('tail-db.filename');

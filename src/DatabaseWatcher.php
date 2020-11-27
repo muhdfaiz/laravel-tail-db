@@ -34,7 +34,7 @@ class DatabaseWatcher
     public function recordQuery(QueryExecuted $event)
     {
         // Check if the query contain keywords user want to ignore based on the config.
-        if (config('tail-db.ignore_query_keyword') === true
+        if (config('tail-db.ignore_query_keyword')
             && preg_match('('.config('tail-db.ignore_query_keyword').')', strtolower($event->sql)) === 1
         ) {
             return;

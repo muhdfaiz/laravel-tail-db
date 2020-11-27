@@ -119,7 +119,7 @@ abstract class TestCase extends TestBenchTestCase
     }
 
     /**
-     * Enable the library.
+     * Enable the logging.
      *
      * @param $app
      */
@@ -128,6 +128,21 @@ abstract class TestCase extends TestBenchTestCase
         $app->config->set('tail-db.log_query', true);
     }
 
+    /**
+     * Ignore query keyword.
+     *
+     * @param $app
+     */
+    protected function useIgnoreQueryKeyword($app)
+    {
+        $app->config->set('tail-db.ignore_query_keyword', 'select|insert');
+    }
+
+    /**
+     * Create dummy data.
+     *
+     * @return mixed
+     */
     protected function createDummyData()
     {
         $input = [
