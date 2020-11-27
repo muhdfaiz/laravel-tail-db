@@ -5,7 +5,11 @@ namespace Muhdfaiz\LaravelTailDb;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
+use React\EventLoop\Factory;
+use React\Socket\ConnectionInterface;
+use React\Socket\Connector;
 
 class DatabaseWatcher
 {
@@ -13,9 +17,9 @@ class DatabaseWatcher
      * Register the watcher.
      *
      * @param  Application  $app
-     * @return void
+     * @return  void
      */
-    public function register($app)
+    public function register(Application $app)
     {
         $app['events']->listen(QueryExecuted::class, [$this, 'recordQuery']);
     }
@@ -24,26 +28,30 @@ class DatabaseWatcher
      * Record a query was executed.
      *
      * @param QueryExecuted $event
+     *
      * @return void
      */
     public function recordQuery(QueryExecuted $event)
     {
         // Check if the query contain keywords user want to ignore based on the config.
-        if (config('tail-db.ignore_query_keyword') && preg_match('(' . config('tail-db.ignore_query_keyword') . ')', strtolower($event->sql)) === 1) {
+        if (config('tail-db.ignore_query_keyword') === true
+            && preg_match('('.config('tail-db.ignore_query_keyword').')', strtolower($event->sql)) === 1
+        ) {
             return;
         }
 
         // Need to skip recording if the query received related to migration.
         // For example, create table, drop table and alter table.
-        if ($this->checkIfQueryRelatedToMigration(strtolower($event->sql))) {
+        if ($this->checkIfQueryRelatedToMigration(strtolower($event->sql)) === true) {
             return;
-        };
+        }
 
         // Get stack trace.
         $caller = $this->getCallerFromStackTrace();
 
         // Set data before storing in the database log file.
         $data = [
+            'url' => Request::url(),
             'connection' => $event->connectionName,
             'bindings' => $event->bindings,
             'sql' => strtolower($this->replaceBindings($event)),
@@ -52,8 +60,35 @@ class DatabaseWatcher
             'line' => $caller['line'],
         ];
 
-        // Store the data in the log file.
-        Log::channel('taildb')->info(json_encode($data));
+        // Store the query data in the log file if enabled.
+        if (config('tail-db.log_query')) {
+            Log::channel('taildb')->info(json_encode($data));
+        }
+
+        $this->sendDataToReactPHPServer($data);
+    }
+
+    /**
+     * Send data to react PHP socket.
+     *
+     * @param array $data SQL query data.
+     *
+     * @return void
+     */
+    protected function sendDataToReactPHPServer(array $data)
+    {
+        $host = config('tail-db.host');
+        $port = config('tail-db.port');
+
+        $loop = Factory::create();
+        $connector = new Connector($loop);
+
+        $connector->connect($host.':'.$port)
+            ->then(function (ConnectionInterface $connection) use ($data) {
+                $connection->write(json_encode($data));
+            });
+
+        $loop->run();
     }
 
     /**
@@ -69,7 +104,7 @@ class DatabaseWatcher
                 return false;
             }
 
-            if (Str::contains($frame['file'],'vendor'.DIRECTORY_SEPARATOR.'laravel')) {
+            if (Str::contains($frame['file'], 'vendor'.DIRECTORY_SEPARATOR.'laravel')) {
                 return false;
             }
 
@@ -96,7 +131,7 @@ class DatabaseWatcher
      *
      * @return string
      */
-    public function replaceBindings($event)
+    public function replaceBindings(QueryExecuted $event)
     {
         $sql = $event->sql;
 

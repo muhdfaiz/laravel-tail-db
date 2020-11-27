@@ -36,8 +36,9 @@ class DatabaseWatcherTest extends TestCase
 
     /**
      * @test
+     * @environment-setup useEnableLogging
      */
-    public function it_record_the_query_to_the_log_file()
+    public function it_record_the_query_to_the_log_file_if_enabled()
     {
         $user = UserModel::create(['name' => 'Test Person', 'email' => 'testuser@gmail.com']);
 
@@ -69,6 +70,28 @@ class DatabaseWatcherTest extends TestCase
     /**
      * @test
      */
+    public function it_will_not_record_the_query_to_the_log_file_if_disabled()
+    {
+        $user = UserModel::create(['name' => 'Test Person', 'email' => 'testuser@gmail.com']);
+
+        $query = UserModel::where('email', $user->email);
+        $user = $query->first();
+
+        $filename = config('tail-db.filename');
+        $path = config('tail-db.path');
+
+        // Read last line of the log file.
+        $process = new Process(['tail', '-n', '1', $path . '/' . $filename]);
+        $process->run();
+        $logContent = $process->getOutput();
+
+        $this->assertEmpty($logContent);
+    }
+
+    /**
+     * @test
+     * @environment-setup useEnableLogging
+     */
     public function it_will_skip_recording_query_related_with_migration()
     {
         $this->createDummyData();
@@ -94,16 +117,15 @@ class DatabaseWatcherTest extends TestCase
         $this->assertFalse(str_contains($logData, "create table `test_table`"));
     }
 
-    /** @test */
+    /**
+     * @test
+     * @environment-setup useEnableLogging
+     */
     public function it_will_not_record_query_contains_ignore_keyword()
     {
-        config(['tail-db.enabled' => true]);
         config(['tail-db.ignore_query_keyword' => 'select|insert']);
-        config(['tail-db.clear_log' => false]);
 
         $this->createDummyData();
-
-        Artisan::call('tail:db');
 
         $filename = config('tail-db.filename');
         $path = config('tail-db.path');

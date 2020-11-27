@@ -118,6 +118,16 @@ abstract class TestCase extends TestBenchTestCase
         $app->config->set('tail-db.enabled', true);
     }
 
+    /**
+     * Enable the library.
+     *
+     * @param $app
+     */
+    protected function useEnableLogging($app)
+    {
+        $app->config->set('tail-db.log_query', true);
+    }
+
     protected function createDummyData()
     {
         $input = [

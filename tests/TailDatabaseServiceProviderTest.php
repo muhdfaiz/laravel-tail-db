@@ -6,7 +6,7 @@ class TailDatabaseServiceProviderTest extends TestCase
 {
     /**
      * @test
-     * @environment-setup useEnableLibrary
+     * @environment-setup useEnableLogging
      */
     public function it_will_add_taildb_logging_channel_when_enabled()
     {

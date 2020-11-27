@@ -3,19 +3,43 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Laravel Tail Database Switch
+    | Status
     |--------------------------------------------------------------------------
     |
     | This option used to enable or disable the Laravel Tail DB watcher.
     | If enabled, every sql query executed from the application will
-    | be captured and store in the directory you based on the config.
+    | be captured and store the query in the log file if you enabled the
+    | query option.
     |
     */
     'enabled' => env('TAIL_DB_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
-    | Duration of time considered slow query.
+    | Host
+    |--------------------------------------------------------------------------
+    |
+    | Laravel Tail DB use ReactPHP to monitor the SQL query. When you run
+    | 'tail:db' command, it will start the ReactPHP Server. ReactPHP Server
+    | will use this host when starting the server.
+    |
+    */
+    'host' => env('TAIL_DB_HOST', '0.0.0.0'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Port
+    |--------------------------------------------------------------------------
+    |
+    | Laravel Tail DB use ReactPHP to monitor the SQL query. When you run
+    | 'tail:db' command, it will start the ReactPHP Server. ReactPHP Server
+    | will use this port when starting the server.
+    */
+    'port' => env('TAIL_DB_PORT', '9001'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Duration of time to considered as slow query.
     |--------------------------------------------------------------------------
     |
     | This option used to tell Laravel Tail DB if the query slow or not.
@@ -42,13 +66,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Log Query
+    |--------------------------------------------------------------------------
+    |
+    | Option to specify if you want to store the SQL query in the log file.
+    |
+    */
+    'log_query' => env('TAIL_DB_LOG_QUERY', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filename to store mysql queries log
     |--------------------------------------------------------------------------
     |
     | Default filename is database.log
     |
     */
-    'filename' => env ('TAIL_DB_FILENAME', 'database.log'),
+    'filename' => env('TAIL_DB_FILENAME', 'database.log'),
 
     /*
     |--------------------------------------------------------------------------
@@ -58,7 +92,7 @@ return [
     | Default path is inside storage/logs.
     |
     */
-    'path' => env ('TAIL_DB_PATH', storage_path('logs')),
+    'path' => env('TAIL_DB_PATH', storage_path('logs')),
 
     /*
     |--------------------------------------------------------------------------
@@ -70,15 +104,5 @@ return [
     | If turn off, Laravel Tail DB only show the query executed, the time and
     | the location where the query executed.
     */
-    'show_explain' => env ('TAIL_DB_SHOW_EXPLAIN', true),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Clear log
-    |--------------------------------------------------------------------------
-    |
-    | When you end the tail:database command or every time Laravel Tail DB
-    | received new data, the data in the log will be cleared.
-    */
-    'clear_log' => env ('TAIL_DB_CLEAR_LOG', true),
+    'show_explain' => env('TAIL_DB_SHOW_EXPLAIN', true),
 ];

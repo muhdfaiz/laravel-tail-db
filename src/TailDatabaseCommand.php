@@ -4,7 +4,9 @@ namespace Muhdfaiz\LaravelTailDb;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Process\Process;
+use React\EventLoop\Factory;
+use React\Socket\ConnectionInterface;
+use React\Socket\Server;
 use Symfony\Component\Console\Helper\Table;
 
 class TailDatabaseCommand extends Command
@@ -21,7 +23,7 @@ class TailDatabaseCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Tail latest database query executed with automatically running explain query.';
+    protected $description = 'Listen latest database query executed with automatically running explain query.';
 
     /**
      * Create a new command instance.
@@ -40,14 +42,6 @@ class TailDatabaseCommand extends Command
      */
     public function handle()
     {
-        $filename = config('tail-db.filename');
-        $path = config('tail-db.path');
-
-        // Check file exist. If not exist create empty log file.
-        if (!file_exists( $path . '/' . $filename)) {
-            file_put_contents($path . '/' . $filename, '');
-        }
-
         // Show an error message if Laravel Tail DB not enabled.
         if (!$this->checkStatusEnabled()) {
             $this->output->writeln(PHP_EOL);
@@ -59,34 +53,50 @@ class TailDatabaseCommand extends Command
 
         $this->output->writeln('<info>Listening for new query from application.....</info>' . PHP_EOL);
 
-        $tailCommand = $this->generateTailCommand();
+        list($socket, $loop) = $this->initializeReactPhpServer();
 
-        Process::fromShellCommandline($tailCommand, config('tail-db.path'))
-            ->setTty(false)
-            ->setTimeout(null)
-            ->run(function ($type, $logData) {
-                if (!$logData) {
+        // Connect to React Php Server and listen for the data.
+        $socket->on('connection', function (ConnectionInterface $connection) {
+            $connection->on('data', function ($data) use ($connection) {
+                if (!$data) {
                     return;
                 }
 
-                $logData = $this->parseLogData($logData);
+                $queryData = $this->parseQueryData($data);
 
-                $this->outputQueryDetails($logData);
+                $this->outputQueryDetails($queryData);
 
-                $databaseDriver = config('database.connections.' . $logData['connection'] . '.driver');
+                $databaseDriver = config('database.connections.' . $queryData['connection'] . '.driver');
 
                 // For SQL Server, don't have explain command like SQLite, MySQL and PostgreSQL.
                 // Need to check if the database using SQL Server or not.
                 // If using SQL Server, disable the explain command.
                 if (config('tail-db.show_explain') && $databaseDriver !== 'sqlsrv'
-                    && preg_match('(select|delete|insert|replace|update)', $logData['sql']) === 1) {
-                    $this->outputExplainResultInTableFormat($logData);
+                    && preg_match('(select|delete|insert|replace|update)', $queryData['sql']) === 1) {
+                    $this->outputExplainResultInTableFormat($queryData);
                 }
 
-                if (config('tail-db.clear_log')) {
-                    $this->clearLogFile();
-                }
+                $connection->close();
             });
+        });
+
+        $loop->run();
+    }
+
+    /**
+     * Initialize React Php Server based on host and port in the config.
+     *
+     * @return array
+     */
+    protected function initializeReactPhpServer()
+    {
+        $host = config('tail-db.host');
+        $port = config('tail-db.port');
+
+        $loop = Factory::create();
+        $socket = new Server($host.':'.$port, $loop);
+
+        return [$socket, $loop];
     }
 
     /**
@@ -136,14 +146,9 @@ class TailDatabaseCommand extends Command
      *
      * @return array
      */
-    protected function parseLogData(string $logData)
+    protected function parseQueryData(string $logData)
     {
-        $needle = config('app.env') . '.INFO: ';
-
-        $databaseQueryJSON = str_replace($needle, '', strstr($logData, $needle));
-        $databaseQueryArray = json_decode($databaseQueryJSON, true);
-
-        return $databaseQueryArray;
+        return json_decode($logData, true);
     }
 
     /**
@@ -156,9 +161,7 @@ class TailDatabaseCommand extends Command
     protected function executeExplainQuery(array $logData)
     {
         $explainQuery = 'explain ' . str_replace('Query: ', '', $logData['sql']);
-        $explainResult = DB::connection($logData['connection'])->select($explainQuery);
-
-        return $explainResult;
+        return DB::connection($logData['connection'])->select($explainQuery);
     }
 
     /**
@@ -171,13 +174,15 @@ class TailDatabaseCommand extends Command
     {
         $timeColor = 'blue';
 
-        if ($logData['time'] > config('tail-db.slow_duration')) {
+        if (floatval($logData['time']) > config('tail-db.slow_duration')) {
             $timeColor = 'red';
         }
 
-        $file = '<options=bold>File:</> <info>' . $logData['file'] . '</info>  <options=bold>Line:</> <info>' . $logData['line'] . '</info>';
+        $url = '<options=bold>Url:</> <info>' . $logData['url'] . '</info>  <options=bold>';
+        $file = '<options=bold>File:</> <info>' . $logData['file'] . '</info>  <options=bold>Line:</> <info>' .$logData['line'] . '</info>';
         $query = '<options=bold>Query:</> <info>' . $logData['sql'] . '</info>  <options=bold>Time:</> <fg=' . $timeColor . '>' . $logData['time'] . ' ms</>';
 
+        $this->output->writeln($url);
         $this->output->writeln($file);
         $this->output->writeln($query);
 
@@ -206,7 +211,7 @@ class TailDatabaseCommand extends Command
         // Need to set max width to support screen with smaller width.
         if ($databaseDriver === 'pgsql') {
             $table->setColumnMaxWidth(0, 120);
-        } else if ($databaseDriver === 'mysql') {
+        } elseif ($databaseDriver === 'mysql') {
             $table->setColumnMaxWidth(5, 60);
             $table->setColumnMaxWidth(6, 60);
         }
@@ -280,17 +285,5 @@ class TailDatabaseCommand extends Command
         }
 
         return $rows;
-    }
-
-    /**
-     * Clear log file uses to record database query.
-     */
-    protected function clearLogFile()
-    {
-        // Clear log file.
-        $filename = config('tail-db.filename');
-        $path = config('tail-db.path');
-
-        fclose(fopen($path . '/' . $filename,'w'));
     }
 }

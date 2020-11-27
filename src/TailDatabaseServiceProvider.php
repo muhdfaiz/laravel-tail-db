@@ -23,14 +23,20 @@ class TailDatabaseServiceProvider extends ServiceProvider
             __DIR__.'/../config/tail-db.php' => config_path('tail-db.php'),
         ], 'tail-db-config');
 
+        // Check if Laravel Tail Db enable or not.
+        // If not enable listen to the sql query from application.
         if (config('tail-db.enabled')) {
-            $newLoggingChannel = [
-                'driver' => 'single',
-                'path' => config('tail-db.path') . '/' . config('tail-db.filename'),
-                'level' => env('LOG_LEVEL', 'debug'),
-            ];
+            // Check if Laravel Tail Db logging enable or not.
+            // If enable store the query in log file.
+            if (config('tail-db.log_query')) {
+                $newLoggingChannel = [
+                    'driver' => 'single',
+                    'path' => config('tail-db.path') . '/' . config('tail-db.filename'),
+                    'level' => env('LOG_LEVEL', 'debug'),
+                ];
 
-            $this->app['config']["logging.channels.taildb"] = $newLoggingChannel;
+                $this->app['config']["logging.channels.taildb"] = $newLoggingChannel;
+            }
 
             TailDatabase::start($this->app);
         }
