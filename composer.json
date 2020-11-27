@@ -1,6 +1,6 @@
 {
     "name": "muhdfaiz/laravel-tail-db",
-    "description": "Provide artisan command to tail database query. Able to automatically run explain command for each of query received.",
+    "description": "Provide artisan command to monitor realtime database query executed from the application. Able to automatically run explain command for each of query received.",
     "keywords": [
         "laravel",
         "tail",
