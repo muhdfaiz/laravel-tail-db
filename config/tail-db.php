@@ -24,7 +24,7 @@ return [
     | will use this host when starting the server.
     |
     */
-    'host' => env('TAIL_DB_HOST', '0.0.0.0'),
+    'host' => env('TAIL_DB_HOST', '127.0.0.1'),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ return [
     | 'tail:db' command, it will start the ReactPHP Server. ReactPHP Server
     | will use this port when starting the server.
     */
-    'port' => env('TAIL_DB_PORT', '9001'),
+    'port' => env('TAIL_DB_PORT', '9002'),
 
     /*
     |--------------------------------------------------------------------------
