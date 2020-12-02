@@ -44,7 +44,7 @@ php artisan tail:db
 
 ## Documentation
 
-For detail of installation instructions, in-depth usage, please take a look at the [documentation](https://muhdfaiz.github.io/laravel-tail-db/).
+For detail of installation instructions, in-depth usage, please take a look at the [documentation](https://laravel-tail-db.muhdfaiz.com/).
 
 ### Changelog
 
