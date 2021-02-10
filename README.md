@@ -50,6 +50,10 @@ For detail of installation instructions, in-depth usage, please take a look at t
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
+### Roadmap
+
+Create desktop app to monitor the sql query.
+
 ## Contributing
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
