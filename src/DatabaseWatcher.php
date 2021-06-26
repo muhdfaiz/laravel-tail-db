@@ -52,6 +52,7 @@ class DatabaseWatcher
         $data = [
             'url' => Request::url(),
             'connection' => $event->connectionName,
+            'database' => config('database.connections.' . $event->connectionName . '.database'),
             'bindings' => $event->bindings,
             'sql' => strtolower($this->replaceBindings($event)),
             'time' => number_format($event->time, 2, '.', ''),

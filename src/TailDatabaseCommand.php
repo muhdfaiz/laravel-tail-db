@@ -3,6 +3,7 @@
 namespace Muhdfaiz\LaravelTailDb;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use React\EventLoop\Factory;
 use React\Socket\ConnectionInterface;
@@ -161,6 +162,11 @@ class TailDatabaseCommand extends Command
     protected function executeExplainQuery(array $logData)
     {
         $explainQuery = 'explain ' . str_replace('Query: ', '', $logData['sql']);
+
+        $connection = $logData['connection'];
+        $key = 'database.connections.' . $connection . '.database';
+
+        Config::set($key, $logData['database']);
         return DB::connection($logData['connection'])->select($explainQuery);
     }
 
