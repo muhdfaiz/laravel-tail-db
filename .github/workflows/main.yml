@@ -21,11 +21,12 @@ jobs:
                 image: mysql:5.7
                 env:
                     MYSQL_USER: laravel_user
+                    MYSQL_PASSWORD: laravel_pass
                     MYSQL_ROOT_PASSWORD: 123456
                     MYSQL_DATABASE: test_db
                 ports:
                     - 3306:3306
-                options: --health-cmd="mysqladmin health ping" --health-interval=10s --health-timeout=5s --health-retries=10
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=10
 
         strategy:
             fail-fast: false
@@ -68,7 +69,7 @@ jobs:
                 env:
                   DB_CONNECTION: mysql
                   DB_DATABASE: test_db
-                  DB_PASSWORD: 123456
+                  DB_PASSWORD: laravel_pass
                   DB_PORT: ${{ job.services.mysql.ports[3306] }}
                   DB_USER: laravel_user
                   DB_HOST: 127.0.0.1
