@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "php": "^7.0",
+        "php": "^7.0|^8.0",
         "react/socket": "^1.6",
         "react/event-loop": "^1.1"
     },
