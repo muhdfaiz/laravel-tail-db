@@ -1,5 +1,5 @@
 {
-    "name": "muhdfaiz/laravel-tail-db",
+    "name": "tutorpeers/laravel-tail-db",
     "description": "Provide artisan command to monitor realtime database query executed from the application. Able to automatically run explain command for each of query received.",
     "keywords": [
         "laravel",
@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "php": "^7.0",
+        "php": "^7.0|^8.0",
         "react/socket": "^1.6",
         "react/event-loop": "^1.1"
     },
